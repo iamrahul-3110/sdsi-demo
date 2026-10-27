@@ -9,13 +9,14 @@ from typing import List
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, get_booking_service
 from app.models.booking import (
     BookingCreate,
     BookingRecurring,
     BookingUpdate,
     FindSlotRequest,
 )
+from app.services.booking_service import BookingService
 from app.storage.repository import Repository, set_repository
 
 
@@ -54,15 +55,21 @@ def repo(seed_rooms_json: str) -> Repository:
 
 
 # ---------------------------------------------------------------------------
-# FastAPI TestClient
+# FastAPI TestClient with dependency override
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
 def client(repo: Repository) -> TestClient:
-    """Return a TestClient backed by the isolated repository."""
-    # Ensure the app's dependency chain uses our isolated repo
+    """Return a TestClient with the isolated repository injected."""
     set_repository(repo)
-    return TestClient(app)
+
+    # Override the dependency so every request uses our test service
+    def _override() -> BookingService:
+        return BookingService(repo)
+
+    app.dependency_overrides[get_booking_service] = _override
+    yield TestClient(app)
+    app.dependency_overrides.clear()
 
 
 # ---------------------------------------------------------------------------

@@ -47,7 +47,7 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# Dependency
+# Dependency (overridden in tests via app.dependency_overrides)
 # ---------------------------------------------------------------------------
 
 def get_booking_service() -> BookingService:
@@ -81,13 +81,11 @@ async def booking_error_handler(request: Request, exc: BookingError) -> JSONResp
 async def validation_handler(
     request: Request, exc: RequestValidationError,
 ) -> JSONResponse:
-    # Extract the first user-friendly error message
     detail = "Invalid request"
     if exc.errors():
         err = exc.errors()[0]
         field = " → ".join(str(loc) for loc in err["loc"])
         detail = f"{field}: {err['msg']}"
-    # Determine error code from context
     error_code = ERR_INVALID_TIME_RANGE
     detail_lower = detail.lower()
     if "business hour" in detail_lower:
@@ -120,7 +118,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     tags=["Rooms"],
     summary="List all available rooms",
 )
-async def list_rooms(svc: BookingService = Depends(_service)):
+async def list_rooms(svc: BookingService = Depends(get_booking_service)):
     """Return every conference room loaded from the seed data."""
     return svc.list_rooms()
 
@@ -132,7 +130,10 @@ async def list_rooms(svc: BookingService = Depends(_service)):
     summary="Get a single room by ID",
     responses={404: {"model": ErrorDetail}},
 )
-async def get_room(room_id: str, svc: BookingService = Depends(_service)):
+async def get_room(
+    room_id: str,
+    svc: BookingService = Depends(get_booking_service),
+):
     """Retrieve details for a specific room."""
     return svc.get_room(room_id)
 
@@ -155,7 +156,7 @@ async def get_room(room_id: str, svc: BookingService = Depends(_service)):
 )
 async def create_booking(
     body: BookingCreate,
-    svc: BookingService = None,
+    svc: BookingService = Depends(get_booking_service),
 ):
     """Book a room for a given date and time range.
 
@@ -165,8 +166,6 @@ async def create_booking(
     - No overlapping bookings on the same room+date
     - Back-to-back bookings (E1 == S2) are allowed
     """
-    if svc is None:
-        svc = _service()
     return svc.create_booking(body)
 
 
@@ -180,11 +179,9 @@ async def list_bookings(
     room_id: Optional[str] = Query(None, description="Filter by room ID"),
     date: Optional[date] = Query(None, description="Filter by date (YYYY-MM-DD)"),
     organiser: Optional[str] = Query(None, description="Filter by organiser"),
-    svc: BookingService = None,
+    svc: BookingService = Depends(get_booking_service),
 ):
     """List all bookings, optionally filtered by room, date, or organiser."""
-    if svc is None:
-        svc = _service()
     bookings = svc.list_bookings(room_id, date, organiser)
     return BookingListResponse(bookings=bookings, count=len(bookings))
 
@@ -196,10 +193,11 @@ async def list_bookings(
     summary="Retrieve a single booking (M1)",
     responses={404: {"model": ErrorDetail}},
 )
-async def get_booking(booking_id: str, svc: BookingService = None):
+async def get_booking(
+    booking_id: str,
+    svc: BookingService = Depends(get_booking_service),
+):
     """Get a booking by its unique ID."""
-    if svc is None:
-        svc = _service()
     return svc.get_booking(booking_id)
 
 
@@ -217,15 +215,13 @@ async def get_booking(booking_id: str, svc: BookingService = None):
 async def update_booking(
     booking_id: str,
     body: BookingUpdate,
-    svc: BookingService = None,
+    svc: BookingService = Depends(get_booking_service),
 ):
     """Update a booking's fields.
 
     Partial updates are supported — omitted fields keep their current values.
     Re-validates conflicts (excluding self) and capacity on the merged result.
     """
-    if svc is None:
-        svc = _service()
     return svc.update_booking(booking_id, body)
 
 
@@ -236,10 +232,11 @@ async def update_booking(
     summary="Cancel/delete a booking (M1)",
     responses={404: {"model": ErrorDetail}},
 )
-async def delete_booking(booking_id: str, svc: BookingService = None):
+async def delete_booking(
+    booking_id: str,
+    svc: BookingService = Depends(get_booking_service),
+):
     """Remove a booking permanently."""
-    if svc is None:
-        svc = _service()
     svc.delete_booking(booking_id)
 
 
@@ -269,7 +266,10 @@ async def delete_booking(booking_id: str, svc: BookingService = None):
         404: {"model": ErrorDetail, "description": "No slot available"},
     },
 )
-async def find_slot(body: FindSlotRequest, svc: BookingService = None):
+async def find_slot(
+    body: FindSlotRequest,
+    svc: BookingService = Depends(get_booking_service),
+):
     """Search for the earliest time slot that fits the group.
 
     Uses **best-fit capacity** tie-breaking: when multiple rooms can hold
@@ -279,8 +279,6 @@ async def find_slot(body: FindSlotRequest, svc: BookingService = None):
     - Business hours: 09:00 – 18:00
     - Duration: 1 – 540 minutes
     """
-    if svc is None:
-        svc = _service()
     result = svc.find_slot(body)
     if result is None:
         raise HTTPException(
@@ -311,7 +309,10 @@ async def find_slot(body: FindSlotRequest, svc: BookingService = None):
         422: {"model": ErrorDetail},
     },
 )
-async def create_recurring(body: BookingRecurring, svc: BookingService = None):
+async def create_recurring(
+    body: BookingRecurring,
+    svc: BookingService = Depends(get_booking_service),
+):
     """Schedule the same booking across multiple weeks.
 
     Each occurrence is evaluated independently:
@@ -322,8 +323,6 @@ async def create_recurring(body: BookingRecurring, svc: BookingService = None):
     This is *not* all-or-nothing — conflicts on some weeks do not
     prevent successful bookings on other weeks.
     """
-    if svc is None:
-        svc = _service()
     return svc.create_recurring(body)
 
 
