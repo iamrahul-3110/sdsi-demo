@@ -1,0 +1,82 @@
+[
+  {
+    "id": "room-001",
+    "name": "North Boardroom",
+    "capacity": 20,
+    "floor": 1,
+    "amenities": ["projector", "whiteboard", "conference-phone", "video-conferencing"],
+    "description": "Large executive boardroom with panoramic windows"
+  },
+  {
+    "id": "room-002",
+    "name": "South Hub",
+    "capacity": 8,
+    "floor": 1,
+    "amenities": ["whiteboard", "tv-screen"],
+    "description": "Cozy mid-sized collaboration space"
+  },
+  {
+    "id": "room-003",
+    "name": "The Fishbowl",
+    "capacity": 4,
+    "floor": 2,
+    "amenities": ["whiteboard"],
+    "description": "Glass-walled huddle room for quick syncs"
+  },
+  {
+    "id": "room-004",
+    "name": "Skyline Terrace Room",
+    "capacity": 30,
+    "floor": 3,
+    "amenities": ["projector", "sound-system", "video-conferencing", "catering-area"],
+    "description": "Large event space with city skyline views"
+  },
+  {
+    "id": "room-005",
+    "name": "Pixel Lab",
+    "capacity": 12,
+    "floor": 2,
+    "amenities": ["projector", "whiteboard", "tv-screen", "video-conferencing"],
+    "description": "Tech-enabled collaboration lab with dual displays"
+  },
+  {
+    "id": "room-006",
+    "name": "Quiet Cove",
+    "capacity": 2,
+    "floor": 1,
+    "amenities": [],
+    "description": "Minimalist focus room for 1-on-1 conversations"
+  },
+  {
+    "id": "room-007",
+    "name": "Innovation Loft",
+    "capacity": 15,
+    "floor": 3,
+    "amenities": ["projector", "whiteboard", "bean-bags", "standing-desk"],
+    "description": "Casual creative space with flexible seating"
+  },
+  {
+    "id": "room-008",
+    "name": "Client Suite A",
+    "capacity": 10,
+    "floor": 1,
+    "amenities": ["projector", "video-conferencing", "conference-phone", "catering-area"],
+    "description": "Premium client-facing meeting suite"
+  },
+  {
+    "id": "room-009",
+    "name": "Garden Pavilion",
+    "capacity": 25,
+    "floor": 0,
+    "amenities": ["sound-system", "outdoor-seating"],
+    "description": "Semi-open garden meeting space (ground floor)"
+  },
+  {
+    "id": "room-010",
+    "name": "War Room",
+    "capacity": 16,
+    "floor": 2,
+    "amenities": ["projector", "whiteboard", "tv-screen", "video-conferencing", "conference-phone"],
+    "description": "All-hands ready ops room with full AV suite"
+  }
+]
