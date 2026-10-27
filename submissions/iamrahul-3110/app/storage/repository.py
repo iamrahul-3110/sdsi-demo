@@ -5,6 +5,7 @@ SQLite persistence (future extension point).
 """
 
 import json
+import os
 import threading
 from datetime import date, datetime, time, timezone
 from typing import Dict, List, Optional
@@ -81,7 +82,8 @@ class _BookingRecord:
 # Repository
 # ---------------------------------------------------------------------------
 
-ROOMS_JSON_PATH = __file__.rstrip(".py").removesuffix("repository").rstrip("/\\") + "rooms.json"
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOMS_JSON_PATH = os.path.join(_HERE, "rooms.json")
 
 
 class Repository:
