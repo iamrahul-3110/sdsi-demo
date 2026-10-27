@@ -6,7 +6,7 @@ SQLite persistence (future extension point).
 
 import json
 import threading
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 from typing import Dict, List, Optional
 
 from app.models.booking import BookingResponse
@@ -44,7 +44,7 @@ class _BookingRecord:
         self.end_time = end_time
         self.organiser = organiser
         self.attendees = attendees
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         self.created_at = created_at or now
         self.updated_at = updated_at or now
 
@@ -185,7 +185,7 @@ class Repository:
                 elif field == "date" and isinstance(value, str):
                     value = date.fromisoformat(value)
                 setattr(rec, field, value)
-            rec.updated_at = datetime.utcnow()
+            rec.updated_at = datetime.now(timezone.utc)
             return rec
 
     def delete_booking(self, booking_id: str) -> bool:

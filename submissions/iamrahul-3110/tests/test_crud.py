@@ -198,7 +198,8 @@ class TestUpdateBooking:
         # Change end_time without changing room/date/start — should succeed
         resp = client.put(f"{PREFIX}/bookings/{bid}", json={"end_time": "11:30"})
         assert resp.status_code == 200
-        assert resp.json()["end_time"] == "11:30"
+        # Pydantic serialises time with seconds: "11:30:00"
+        assert resp.json()["end_time"] in ("11:30", "11:30:00")
 
     def test_update_nonexistent(self, client: TestClient):
         resp = client.put(f"{PREFIX}/bookings/b-deadbeef1234", json={"title": "Nope"})

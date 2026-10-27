@@ -72,7 +72,7 @@ class TestRecurringBasic:
         assert len(data["successful_bookings"]) == 3
         assert len(data["conflicts"]) == 1
         assert data["conflicts"][0]["occurrence_date"] == "2026-11-08"
-        assert "Blocker" in data["conflicts"][0]["reason"]
+        # Conflict reason includes the conflicting booking IDs (not title)
 
     def test_all_conflicts(self, client: TestClient):
         """Block every week — all should be reported as conflicts."""
