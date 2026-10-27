@@ -1,6 +1,6 @@
 """Booking domain model and Pydantic schemas."""
 
-from datetime import date, datetime, time
+import datetime as _dt
 from typing import List, Optional
 from uuid import uuid4
 
@@ -12,6 +12,11 @@ from pydantic import (
 )
 
 from app.config import BUSINESS_HOURS_END, BUSINESS_HOURS_START
+
+# Re-export types for convenience
+date = _dt.date
+time = _dt.time
+datetime = _dt.datetime
 
 
 def _generate_booking_id() -> str:
