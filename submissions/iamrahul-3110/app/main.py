@@ -11,7 +11,7 @@ ReDoc:       http://localhost:8000/redoc
 from datetime import date
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException, Query, status
+from fastapi import Depends, FastAPI, HTTPException, Query, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
@@ -50,7 +50,7 @@ app = FastAPI(
 # Dependency
 # ---------------------------------------------------------------------------
 
-def _service() -> BookingService:
+def get_booking_service() -> BookingService:
     """FastAPI dependency that provides a BookingService instance."""
     return BookingService(get_repository())
 
@@ -102,6 +102,8 @@ async def validation_handler(
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    if isinstance(exc.detail, dict):
+        return JSONResponse(status_code=exc.status_code, content=exc.detail)
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail, "error_code": "HTTP_ERROR"},
@@ -118,10 +120,8 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     tags=["Rooms"],
     summary="List all available rooms",
 )
-async def list_rooms(svc: BookingService = None):
+async def list_rooms(svc: BookingService = Depends(_service)):
     """Return every conference room loaded from the seed data."""
-    if svc is None:
-        svc = _service()
     return svc.list_rooms()
 
 
@@ -132,10 +132,8 @@ async def list_rooms(svc: BookingService = None):
     summary="Get a single room by ID",
     responses={404: {"model": ErrorDetail}},
 )
-async def get_room(room_id: str, svc: BookingService = None):
+async def get_room(room_id: str, svc: BookingService = Depends(_service)):
     """Retrieve details for a specific room."""
-    if svc is None:
-        svc = _service()
     return svc.get_room(room_id)
 
 

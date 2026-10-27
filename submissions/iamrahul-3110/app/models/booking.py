@@ -1,6 +1,6 @@
 """Booking domain model and Pydantic schemas."""
 
-import datetime as _dt
+from datetime import date as dt_date, datetime as dt_datetime, time as dt_time
 from typing import List, Optional
 from uuid import uuid4
 
@@ -13,11 +13,6 @@ from pydantic import (
 
 from app.config import BUSINESS_HOURS_END, BUSINESS_HOURS_START
 
-# Re-export types for convenience
-date = _dt.date
-time = _dt.time
-datetime = _dt.datetime
-
 
 def _generate_booking_id() -> str:
     return f"b-{uuid4().hex[:12]}"
@@ -27,9 +22,9 @@ class BookingBase(BaseModel):
     """Shared fields for booking schemas."""
     title: str = Field(..., min_length=1, max_length=150, description="Meeting title")
     room_id: str = Field(..., description="ID of the room to book")
-    date: date = Field(..., description="Date of the booking (YYYY-MM-DD)")
-    start_time: time = Field(..., description="Meeting start time (HH:MM)")
-    end_time: time = Field(..., description="Meeting end time (HH:MM)")
+    date: dt_date = Field(..., description="Date of the booking (YYYY-MM-DD)")
+    start_time: dt_time = Field(..., description="Meeting start time (HH:MM)")
+    end_time: dt_time = Field(..., description="Meeting end time (HH:MM)")
     organiser: str = Field(..., min_length=1, max_length=100, description="Organiser name or email")
     attendees: List[str] = Field(
         default_factory=list,
@@ -76,9 +71,9 @@ class BookingUpdate(BaseModel):
     """Request schema for updating an existing booking. All fields optional."""
     title: Optional[str] = Field(None, min_length=1, max_length=150)
     room_id: Optional[str] = None
-    date: Optional[date] = None
-    start_time: Optional[time] = None
-    end_time: Optional[time] = None
+    date: Optional[dt_date] = None
+    start_time: Optional[dt_time] = None
+    end_time: Optional[dt_time] = None
     organiser: Optional[str] = Field(None, min_length=1, max_length=100)
     attendees: Optional[List[str]] = Field(None, max_length=500)
 
@@ -102,22 +97,22 @@ class BookingResponse(BaseModel):
     id: str
     title: str
     room_id: str
-    date: date
-    start_time: time
-    end_time: time
+    date: dt_date
+    start_time: dt_time
+    end_time: dt_time
     organiser: str
     attendees: List[str]
-    created_at: datetime
-    updated_at: datetime
+    created_at: dt_datetime
+    updated_at: dt_datetime
 
 
 class BookingRecurring(BaseModel):
     """Request schema for creating weekly recurring bookings."""
     title: str = Field(..., min_length=1, max_length=150)
     room_id: str = Field(...)
-    start_date: date = Field(..., description="First occurrence date (YYYY-MM-DD)")
-    start_time: time = Field(...)
-    end_time: time = Field(...)
+    start_date: dt_date = Field(..., description="First occurrence date (YYYY-MM-DD)")
+    start_time: dt_time = Field(...)
+    end_time: dt_time = Field(...)
     organiser: str = Field(..., min_length=1, max_length=100)
     attendees: List[str] = Field(default_factory=list, max_length=500)
     recurrence_weeks: int = Field(
@@ -158,7 +153,7 @@ class BookingRecurring(BaseModel):
 
 class FindSlotRequest(BaseModel):
     """Request schema for finding an available time slot."""
-    date: date = Field(..., description="Date to search (YYYY-MM-DD)")
+    date: dt_date = Field(..., description="Date to search (YYYY-MM-DD)")
     duration_minutes: int = Field(..., ge=1, le=540, description="Meeting duration in minutes")
     attendee_count: int = Field(..., ge=1, description="Number of attendees")
 
